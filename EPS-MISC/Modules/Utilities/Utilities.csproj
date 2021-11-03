@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DA501B98-0AE7-440F-BEC3-B82EB7B5669D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Modules.Utilities</RootNamespace>
+    <AssemblyName>Utilities</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Oracle.ManagedDataAccess.12.1.2400\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess.EntityFramework, Version=6.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Oracle.ManagedDataAccess.EntityFramework.12.1.2400\lib\net45\Oracle.ManagedDataAccess.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Banks.cs" />
+    <Compile Include="Engineers.cs" />
+    <Compile Include="Accounts.cs" />
+    <Compile Include="Business.cs" />
+    <Compile Include="FormEngr.cs" />
+    <Compile Include="FormOwner.cs" />
+    <Compile Include="FormOwnerClass.cs" />
+    <Compile Include="Forms\frmBank.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmBank.Designer.cs">
+      <DependentUpon>frmBank.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmCategory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmCategory.Designer.cs">
+      <DependentUpon>frmCategory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmEngineerTypes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmEngineerTypes.Designer.cs">
+      <DependentUpon>frmEngineerTypes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmFormType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmFormType.Designer.cs">
+      <DependentUpon>frmFormType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmORDeclaration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmORDeclaration.Designer.cs">
+      <DependentUpon>frmORDeclaration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmORInventory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmORInventory.Designer.cs">
+      <DependentUpon>frmORInventory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmPermitType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmPermitType.Designer.cs">
+      <DependentUpon>frmPermitType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmFeeSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmFeeSearch.Designer.cs">
+      <DependentUpon>frmFeeSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmOccupancy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmOccupancy.Designer.cs">
+      <DependentUpon>frmOccupancy.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmScheduleDelete.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmScheduleDelete.Designer.cs">
+      <DependentUpon>frmScheduleDelete.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmScheduleFees.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmScheduleFees.Designer.cs">
+      <DependentUpon>frmScheduleFees.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmMaterial.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmMaterial.Designer.cs">
+      <DependentUpon>frmMaterial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmScope.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmScope.Designer.cs">
+      <DependentUpon>frmScope.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmOwner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmOwner.Designer.cs">
+      <DependentUpon>frmOwner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmTaskManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmTaskManager.Designer.cs">
+      <DependentUpon>frmTaskManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmTellers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmTellers.Designer.cs">
+      <DependentUpon>frmTellers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\frmUsers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmUsers.Designer.cs">
+      <DependentUpon>frmUsers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material.cs" />
+    <Compile Include="MajorFees.cs" />
+    <Compile Include="AddlMajorFees.cs" />
+    <Compile Include="OtherMajorFees.cs" />
+    <Compile Include="Structure.cs" />
+    <Compile Include="Occupancy.cs" />
+    <Compile Include="Category.cs" />
+    <Compile Include="Scope.cs" />
+    <Compile Include="Permit.cs" />
+    <Compile Include="Subcategories.cs" />
+    <Compile Include="TaskManager.cs" />
+    <Compile Include="AuditTrail.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Common\AppSettings\AppSettings.csproj">
+      <Project>{889d88f6-1668-418f-969a-6466670138b6}</Project>
+      <Name>AppSettings</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\DataConnector\DataConnector.csproj">
+      <Project>{7c12da36-676a-49b3-b59d-c07c96539620}</Project>
+      <Name>DataConnector</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\EncryptUtilities\EncryptUtilities.csproj">
+      <Project>{eb833d79-9d87-48ec-b396-79aace685253}</Project>
+      <Name>EncryptUtilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\MultiColumnComboBox\MultiColumnComboBox.csproj">
+      <Project>{4DD47A19-1A17-4C59-94BA-575E0C2ECC17}</Project>
+      <Name>MultiColumnComboBox</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Common\StringUtilities\StringUtilities.csproj">
+      <Project>{f7cab867-edef-4e74-91bf-6c5385dcf513}</Project>
+      <Name>StringUtilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\EPSEntities\EPSEntities.csproj">
+      <Project>{64f894bd-df57-4d82-8c15-4bea4081b870}</Project>
+      <Name>EPSEntities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Records\Records.csproj">
+      <Project>{06b2ec66-db06-4a88-98db-922969d57da8}</Project>
+      <Name>Records</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\frmBank.resx">
+      <DependentUpon>frmBank.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmCategory.resx">
+      <DependentUpon>frmCategory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmEngineerTypes.resx">
+      <DependentUpon>frmEngineerTypes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmFormType.resx">
+      <DependentUpon>frmFormType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmORDeclaration.resx">
+      <DependentUpon>frmORDeclaration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmORInventory.resx">
+      <DependentUpon>frmORInventory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmPermitType.resx">
+      <DependentUpon>frmPermitType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmFeeSearch.resx">
+      <DependentUpon>frmFeeSearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmOccupancy.resx">
+      <DependentUpon>frmOccupancy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmScheduleDelete.resx">
+      <DependentUpon>frmScheduleDelete.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmScheduleFees.resx">
+      <DependentUpon>frmScheduleFees.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmMaterial.resx">
+      <DependentUpon>frmMaterial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmScope.resx">
+      <DependentUpon>frmScope.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmOwner.resx">
+      <DependentUpon>frmOwner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmTaskManager.resx">
+      <DependentUpon>frmTaskManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmTellers.resx">
+      <DependentUpon>frmTellers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmUsers.resx">
+      <DependentUpon>frmUsers.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

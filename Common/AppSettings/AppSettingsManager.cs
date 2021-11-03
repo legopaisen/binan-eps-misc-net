@@ -13,9 +13,10 @@ namespace Common.AppSettings
     {
         private static string sObject;
         public static SystemUser g_objSystemUser;
+        public static Teller g_objTellerUser;
         private static int m_intYear;
         private static string m_strValidityInMonth;
-        
+
         /*
         static readonly AppSettingsManager instance = new AppSettingsManager();
 
@@ -34,13 +35,28 @@ namespace Common.AppSettings
             set { g_objSystemUser = value; }
         }
 
+        public static Teller Teller
+        {
+            get { return g_objTellerUser; }
+            set { g_objTellerUser = value; }
+        }
+
+        //MCR 20141209 (s)
+        private static string m_sSystemType = string.Empty;
+        public static string GetSystemType
+        {
+            get { return m_sSystemType; }
+            set { m_sSystemType = value; }
+        }
+        //MCR 20141209 (e)
+
         /// <summary>
         /// This static method returns current date/time of database server
         /// </summary>
         /// <returns>the current date/time</returns>
         public static DateTime GetSystemDate() // ALJ 20090902 change to public // pending cosder freeze date
         {
-            
+
             DateTime dtSystemDate = DateTime.Now;
             OracleResultSet result = new OracleResultSet();
             result.Query = "SELECT SYSDATE FROM DUAL";
@@ -53,7 +69,7 @@ namespace Common.AppSettings
             }
             result.Close();
             return dtSystemDate;
-            
+
             //return new DateTime(2009, 01, 13);
         }
         /// <summary>
@@ -153,7 +169,7 @@ namespace Common.AppSettings
             return AppSettingsManager.GetValue("error_tbl", "error_code", "error_desc");
         }
          */
-        
+
         /*
         public static string GetConfigValueByDescription(string strConfigDescription)
         {
@@ -176,9 +192,9 @@ namespace Common.AppSettings
         public static string GetConfigValue(string strConfigCode)
         {
             return AppSettingsManager.GetConfigValue("VALUE_FLD", "config", "subj_code",
-                ":1", strConfigCode);  
+                ":1", strConfigCode);
         }
-        
+
         public static string GetConfigValueByDescription(string strConfigDescription)
         {
             return AppSettingsManager.GetConfigValue("VALUE_FLD", "config", "subj_desc",
@@ -191,23 +207,23 @@ namespace Common.AppSettings
                 "RPAD(:1, 2)", strAuctionCode);
         }
 
-        
+
         public static string GetConfigObject(string sCode)
         {
-            
+
             OracleResultSet xxx = new OracleResultSet();
             xxx.Query = "SELECT OBJECT FROM CONFIG WHERE TRIM(CODE) = :1";
             xxx.AddParameter(":1", sCode);
-            if(xxx.Execute())
+            if (xxx.Execute())
             {
-                if(xxx.Read()==true)
+                if (xxx.Read() == true)
                 {
                     sObject = xxx.GetString("object").Trim();
                 }
             }
             xxx.Close();
             return sObject;
-            
+
         }
 
         public static string GetConfigDescription(string strConfigCode)
@@ -216,14 +232,14 @@ namespace Common.AppSettings
                 "RPAD(:1, 2)", strConfigCode);
         }
 
-        public static string GetConfigValue(string strValueField, string strConfigTable, 
+        public static string GetConfigValue(string strValueField, string strConfigTable,
             string strSubjectField, string strFormatField, string strConfigCode)
         {
             string strConfigValue = string.Empty;
             OracleResultSet result = new OracleResultSet();
             result.Query = string.Format("SELECT {0} FROM {1} WHERE {2} = {3}", strValueField,
                 strConfigTable, strSubjectField, strFormatField);
-                //"SELECT value_fld FROM config_table WHERE subj_code = RPAD(:1, 3)";
+            //"SELECT value_fld FROM config_table WHERE subj_code = RPAD(:1, 3)";
             result.AddParameter(":1", strConfigCode);
             if (result.Execute())
             {
@@ -280,7 +296,7 @@ namespace Common.AppSettings
         }
         //RDO 04302008 (e) get municipal code
 
-        
+
         //for compatibility with older version
         public static string GetDistrictCode()
         {
@@ -394,7 +410,7 @@ namespace Common.AppSettings
         public static DateTime ComputeExpiryDate(string p_sTRN, DateTime p_odtDateReg)
         {
             // RMC 20130214 added function in appsettingsmanager to avoid circular dependencies error when adding reference in projects
-            
+
             DateTime odtDateToExpire;
             DateTime odtDateReg;
 
@@ -475,7 +491,7 @@ namespace Common.AppSettings
             string strDistCode = string.Empty;
 
             result.Query = "select distinct dist_code from brgy order by dist_code";
-            if(result.Execute())
+            if (result.Execute())
             {
                 if (result.Read())
                     strDistCode = result.GetString(0);
@@ -484,6 +500,148 @@ namespace Common.AppSettings
             result.Close();
 
             return strDistCode;
+        }
+
+        public static string GetBlobImageConfig()
+        {
+            // RMC 20150226 adjustment in blob configuration
+            string sConfig = string.Empty;
+            string sTmp = string.Empty;
+            OracleResultSet result = new OracleResultSet();
+            result.CreateBlobConnection();
+
+            //if (m_sSystemType == "A")
+            //{
+            //    sTmp = AppSettingsManager.GetConfigValue("62");
+            //}
+            //else
+            //{
+            //    sTmp = AppSettingsManager.GetConfigValue("63");
+            //}
+
+            //result.Query = "select * from sourcedoc_tbl where srcdoc_desc = '" + sTmp + "' and system_code = '" + m_sSystemType + "'";
+            //if (result.Execute())
+            //{
+            //    if (result.Read())
+            //        sConfig = result.GetString("srcdoc_code");
+            //}
+            //result.Close();
+
+            //TEMPORARILY APPLIED FIXED EPS QUERY
+            result.Query = "select * from sourcedoc_tbl where srcdoc_desc = 'ENGINEERING RECORDS' and system_code = 'E'";
+            if (result.Execute())
+            {
+                if (result.Read())
+                    sConfig = result.GetString("srcdoc_code");
+            }
+            result.Close();
+
+
+            return sConfig;
+        }
+
+        public static bool FeesDisplayOnly(string sCat, string sFeesCode)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            if (sCat == "OTHERS")
+                result.Query = "select display_amt from other_subcategories";
+            else if (sCat == "ADDITIONAL")
+                result.Query = "select display from addl_subcategories";
+
+            result.Query += $" where fees_code = '{sFeesCode}' and fees_term <> 'SUBCATEGORY'";
+
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("display_amt");
+                }
+
+            if (sVal == "Y")
+                return true;
+            else
+                return false;
+        }
+
+        public static string GetFeesDesc(string sCat, string sFeesCode)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            if (sCat == "OTHERS")
+                result.Query = "select fees_desc from other_subcategories";
+            else if (sCat == "ADDITIONAL")
+                result.Query = "select fees_desc from addl_subcategories";
+            else
+                result.Query = "select fees_desc from subcategories";
+
+            result.Query += $" where fees_code = '{sFeesCode}' and fees_term <> 'SUBCATEGORY'";
+
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("fees_desc");
+                }
+
+            return sVal;
+        }
+
+        public static string GetPermitDesc(string sPermitCode)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            result.Query = $"select permit_desc from permit_tbl where permit_code = '{sPermitCode}'";
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("permit_desc");
+                }
+
+            return sVal;
+
+        }
+
+        public static string GetBankName(string sBankId)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            result.Query = $"select bank_nm from bank_table where bank_id = '{sBankId}'";
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("bank_nm");
+                }
+
+            return sVal;
+
+        }
+        public static string GetBankAddress(string sBankId)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            result.Query = $"select bank_branch from bank_table where bank_id = '{sBankId}'";
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("bank_branch");
+                }
+
+            return sVal;
+
+        }
+
+        public static string GetTellerName(string sTellerCode)
+        {
+            OracleResultSet result = new OracleResultSet();
+            string sVal = string.Empty;
+            result.Query = $"select teller_fn, teller_mi, teller_ln from tellers where teller_code = '{sTellerCode}'";
+            if (result.Execute())
+                if (result.Read())
+                {
+                    sVal = result.GetString("teller_fn") + " " + result.GetString("teller_mi") + ". " + result.GetString("teller_ln");
+                }
+
+            return sVal;
+
         }
     }
 }

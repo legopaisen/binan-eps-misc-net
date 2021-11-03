@@ -119,34 +119,43 @@ namespace Common.AppSettings
             return result.ExecuteNonQuery();
         }
 
-        public bool Authenticate(string strPassword)
+        public bool Authenticate(string strPassword, string strTeller)
         {
             if (strPassword != string.Empty)
             {
-                Common.EncryptUtilities.Encrypt enc = new Common.EncryptUtilities.Encrypt();
-                string strEncrypted = enc.EncryptPassword(strPassword);
+                //Common.EncryptUtilities.Encrypt enc = new Common.EncryptUtilities.Encrypt();
+                //string strEncrypted = enc.EncryptPassword(strPassword);
 
+                Encryption enc = new Encryption();
+                string strEncrypted = enc.EncryptString(strPassword);
 
+                int intCount = 0;
                 OracleResultSet result = new OracleResultSet();
                 //use trim to capture ñ character //JVL mal
-                result.Query = "SELECT COUNT(*) FROM tellers WHERE trim(sys_teller) = :1 AND trim(tel_pswd) = :2";
-
-                result.AddParameter(":1", m_strUserCode);
-                
+                result.Query = "SELECT COUNT(*) FROM tellers WHERE trim(teller_code) = :1 AND trim(teller_pwd) = :2";
+                result.AddParameter(":1", strTeller);
                 result.AddParameter(":2", strPassword);
-                //result.AddParameter(":2", strEncrypted);
-                
-                int intCount = 0;
                 int.TryParse(result.ExecuteScalar().ToString(), out intCount);
                 if (intCount != 0)
                 {
-                    result.Close();
                     return true;
                 }
-                result.Close();
+
+                result.Query = "SELECT COUNT(*) FROM tellers WHERE trim(teller_code) = :1 AND trim(teller_pwd) = :2";
+                result.AddParameter(":1", strTeller);
+                result.AddParameter(":2", strEncrypted);
+                int.TryParse(result.ExecuteScalar().ToString(), out intCount);
+                if (intCount != 0)
+                {
+                    return true;
+                }
+                else
+                    return false;
             }
-            return false;
+            else
+                return false;
         }
+
 
         public string District
         {
