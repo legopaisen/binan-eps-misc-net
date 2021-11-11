@@ -961,5 +961,20 @@ namespace EPS
                 }
             }
         }
+
+        private void quarterlyToolStripMenuItem_Click(object sender, EventArgs e) //AFM 20211110 REQUESTED by RJ/MITCH
+        {
+            if (AppSettingsManager.Granted("COL-R"))
+            {
+                TaskManager taskman = new TaskManager();
+                if (!taskman.IsObjectLock("REPORTS-COLLECTIONS", "", ""))
+                {
+                    frmQuarterlyCollection form = new frmQuarterlyCollection();
+                    form.ShowDialog();
+
+                    taskman.IsObjectLock("REPORTS-COLLECTIONS", "DELETE", "");
+                }
+            }
+        }
     }
 }

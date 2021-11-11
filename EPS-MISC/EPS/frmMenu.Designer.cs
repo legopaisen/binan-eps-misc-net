@@ -127,6 +127,7 @@
             this.lblCode = new System.Windows.Forms.Label();
             this.lblDesc = new System.Windows.Forms.Label();
             this.lblDate = new System.Windows.Forms.Label();
+            this.quarterlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MS.SuspendLayout();
             this.pnlButton.SuspendLayout();
             this.SuspendLayout();
@@ -511,7 +512,8 @@
             // 
             this.abstractToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.summaryOfDailyCollectionsToolStripMenuItem,
-            this.abstractOfCollectionsToolStripMenuItem});
+            this.abstractOfCollectionsToolStripMenuItem,
+            this.quarterlyToolStripMenuItem});
             this.abstractToolStripMenuItem.Name = "abstractToolStripMenuItem";
             this.abstractToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
             this.abstractToolStripMenuItem.Text = "Abstract";
@@ -1016,6 +1018,13 @@
             this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblDate.Visible = false;
             // 
+            // quarterlyToolStripMenuItem
+            // 
+            this.quarterlyToolStripMenuItem.Name = "quarterlyToolStripMenuItem";
+            this.quarterlyToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
+            this.quarterlyToolStripMenuItem.Text = "Quarterly Collection Report";
+            this.quarterlyToolStripMenuItem.Click += new System.EventHandler(this.quarterlyToolStripMenuItem_Click);
+            // 
             // frmMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -1148,6 +1157,7 @@
         private System.Windows.Forms.ToolStripMenuItem abstractToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem summaryOfDailyCollectionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem abstractOfCollectionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem quarterlyToolStripMenuItem;
     }
 }
 

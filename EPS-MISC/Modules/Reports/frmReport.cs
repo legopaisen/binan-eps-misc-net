@@ -35,7 +35,7 @@ namespace Modules.Reports
         public string Teller { get; set; }
 
         private string report_cd = string.Empty;
-        private string report_desc = string.Empty;
+        public string report_desc = string.Empty;
 
         //RCD
         public long qty1000 { get; set; }
@@ -61,6 +61,11 @@ namespace Modules.Reports
 
         //Summary of collections
         public List<string> PermitList = new List<string>();
+
+        //Quarterly Collection
+        public string Month { get; set; }
+        public string Quarter { get; set; }
+        public string Year { get; set; }
 
         public frmReport()
         {
@@ -225,6 +230,14 @@ namespace Modules.Reports
 
                 ReportClass = new SummaryOfCollections(this);
 
+            }
+            else if (ReportName == "Quarterly Collections") //AFM 20211110 REQUESTED by RJ/MITCH
+            {
+                report_desc = "Quarterly Collections";
+                this.reportViewer1.SetDisplayMode(Microsoft.Reporting.WinForms.DisplayMode.PrintLayout);
+                this.reportViewer1.LocalReport.ReportEmbeddedResource = "Modules.Reports.Report.AbstractOfCollections.rdlc"; // same format with Abstract as per RJ/Mitch
+
+                ReportClass = new AbstractOfCollections(this);
             }
 
             ReportClass.LoadForm();

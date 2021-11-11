@@ -43,6 +43,7 @@ namespace Modules.Reports
         private void LoadTellers()
         {
             cmbTeller.Items.Clear();
+            cmbTeller.Items.Add("ALL");
             OracleResultSet res = new OracleResultSet();
             res.Query = "select teller_code from tellers order by teller_code";
             if (res.Execute())
@@ -83,7 +84,10 @@ namespace Modules.Reports
             cmbRCDSeries.Items.Clear();
             cmbRCDSeries.Text = "";
             OracleResultSet res = new OracleResultSet();
-            res.Query = $"select distinct rcd_series from rcd_remit where teller_code = '{cmbTeller.Text.Trim()}' and rcd_series in(select rcd_series from partial_remit where rcd_remit.rcd_series = partial_remit.rcd_series and dt_save between '{string.Format("{0:dd-MMM-yy}", dtpFrom.Value)}' and '{string.Format("{0:dd-MMM-yy}", dtpTo.Value)}') order by rcd_series";
+            string sTeller = cmbTeller.Text.Trim(); 
+            if (cmbTeller.Text == "ALL") //requested by rj to include all teller and all rcd option
+                sTeller = "%";
+            res.Query = $"select distinct rcd_series from rcd_remit where teller_code like '{sTeller}' and rcd_series in(select rcd_series from partial_remit where rcd_remit.rcd_series = partial_remit.rcd_series and dt_save between '{string.Format("{0:dd-MMM-yy}", dtpFrom.Value)}' and '{string.Format("{0:dd-MMM-yy}", dtpTo.Value)}') order by rcd_series";
             if(res.Execute())
                 while(res.Read())
                 {

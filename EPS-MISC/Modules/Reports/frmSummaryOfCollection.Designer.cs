@@ -32,6 +32,13 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rdoCollection = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.dgvFees = new System.Windows.Forms.DataGridView();
+            this.chk = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.PermitID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.btnCheckAll = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cmbRCDSeries = new System.Windows.Forms.ComboBox();
             this.label69 = new System.Windows.Forms.Label();
             this.btnClear = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -40,15 +47,8 @@
             this.dtpFrom = new System.Windows.Forms.DateTimePicker();
             this.label1 = new System.Windows.Forms.Label();
             this.cmbTeller = new System.Windows.Forms.ComboBox();
-            this.cmbRCDSeries = new System.Windows.Forms.ComboBox();
             this.btnPrint = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.btnCheckAll = new System.Windows.Forms.Button();
-            this.dgvFees = new System.Windows.Forms.DataGridView();
-            this.chk = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.PermitID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFees)).BeginInit();
@@ -95,6 +95,74 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Fees";
+            // 
+            // dgvFees
+            // 
+            this.dgvFees.AllowUserToAddRows = false;
+            this.dgvFees.AllowUserToDeleteRows = false;
+            this.dgvFees.AllowUserToOrderColumns = true;
+            this.dgvFees.AllowUserToResizeColumns = false;
+            this.dgvFees.AllowUserToResizeRows = false;
+            this.dgvFees.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvFees.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.chk,
+            this.PermitID,
+            this.Description});
+            this.dgvFees.Location = new System.Drawing.Point(55, 83);
+            this.dgvFees.MultiSelect = false;
+            this.dgvFees.Name = "dgvFees";
+            this.dgvFees.RowHeadersVisible = false;
+            this.dgvFees.Size = new System.Drawing.Size(411, 103);
+            this.dgvFees.TabIndex = 13;
+            // 
+            // chk
+            // 
+            this.chk.HeaderText = "";
+            this.chk.Name = "chk";
+            this.chk.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.chk.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.chk.Width = 30;
+            // 
+            // PermitID
+            // 
+            this.PermitID.HeaderText = "PermitID";
+            this.PermitID.Name = "PermitID";
+            this.PermitID.Visible = false;
+            // 
+            // Description
+            // 
+            this.Description.HeaderText = "Description";
+            this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
+            this.Description.Width = 370;
+            // 
+            // btnCheckAll
+            // 
+            this.btnCheckAll.Location = new System.Drawing.Point(472, 83);
+            this.btnCheckAll.Name = "btnCheckAll";
+            this.btnCheckAll.Size = new System.Drawing.Size(75, 26);
+            this.btnCheckAll.TabIndex = 14;
+            this.btnCheckAll.Text = "Check All";
+            this.btnCheckAll.UseVisualStyleBackColor = true;
+            this.btnCheckAll.Click += new System.EventHandler(this.btnCheckAll_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 54);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(58, 18);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "RCD No.";
+            // 
+            // cmbRCDSeries
+            // 
+            this.cmbRCDSeries.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRCDSeries.FormattingEnabled = true;
+            this.cmbRCDSeries.Location = new System.Drawing.Point(70, 51);
+            this.cmbRCDSeries.Name = "cmbRCDSeries";
+            this.cmbRCDSeries.Size = new System.Drawing.Size(110, 26);
+            this.cmbRCDSeries.TabIndex = 11;
             // 
             // label69
             // 
@@ -172,15 +240,6 @@
             this.cmbTeller.TabIndex = 3;
             this.cmbTeller.SelectedIndexChanged += new System.EventHandler(this.cmbTeller_SelectedIndexChanged);
             // 
-            // cmbRCDSeries
-            // 
-            this.cmbRCDSeries.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbRCDSeries.FormattingEnabled = true;
-            this.cmbRCDSeries.Location = new System.Drawing.Point(70, 51);
-            this.cmbRCDSeries.Name = "cmbRCDSeries";
-            this.cmbRCDSeries.Size = new System.Drawing.Size(110, 26);
-            this.cmbRCDSeries.TabIndex = 11;
-            // 
             // btnPrint
             // 
             this.btnPrint.Location = new System.Drawing.Point(559, 210);
@@ -201,65 +260,6 @@
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 54);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(58, 18);
-            this.label4.TabIndex = 12;
-            this.label4.Text = "RCD No.";
-            // 
-            // btnCheckAll
-            // 
-            this.btnCheckAll.Location = new System.Drawing.Point(472, 83);
-            this.btnCheckAll.Name = "btnCheckAll";
-            this.btnCheckAll.Size = new System.Drawing.Size(75, 26);
-            this.btnCheckAll.TabIndex = 14;
-            this.btnCheckAll.Text = "Check All";
-            this.btnCheckAll.UseVisualStyleBackColor = true;
-            this.btnCheckAll.Click += new System.EventHandler(this.btnCheckAll_Click);
-            // 
-            // dgvFees
-            // 
-            this.dgvFees.AllowUserToAddRows = false;
-            this.dgvFees.AllowUserToDeleteRows = false;
-            this.dgvFees.AllowUserToOrderColumns = true;
-            this.dgvFees.AllowUserToResizeColumns = false;
-            this.dgvFees.AllowUserToResizeRows = false;
-            this.dgvFees.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvFees.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.chk,
-            this.PermitID,
-            this.Description});
-            this.dgvFees.Location = new System.Drawing.Point(55, 83);
-            this.dgvFees.MultiSelect = false;
-            this.dgvFees.Name = "dgvFees";
-            this.dgvFees.RowHeadersVisible = false;
-            this.dgvFees.Size = new System.Drawing.Size(411, 103);
-            this.dgvFees.TabIndex = 13;
-            // 
-            // chk
-            // 
-            this.chk.HeaderText = "";
-            this.chk.Name = "chk";
-            this.chk.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.chk.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.chk.Width = 30;
-            // 
-            // PermitID
-            // 
-            this.PermitID.HeaderText = "PermitID";
-            this.PermitID.Name = "PermitID";
-            this.PermitID.Visible = false;
-            // 
-            // Description
-            // 
-            this.Description.HeaderText = "Description";
-            this.Description.Name = "Description";
-            this.Description.ReadOnly = true;
-            this.Description.Width = 370;
-            // 
             // frmSummaryOfCollection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -278,7 +278,7 @@
             this.MinimizeBox = false;
             this.Name = "frmSummaryOfCollection";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Abstract of Collections";
+            this.Text = "Summary of Collections";
             this.Load += new System.EventHandler(this.frmSummaryOfCollection_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

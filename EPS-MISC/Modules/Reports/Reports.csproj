@@ -134,6 +134,12 @@
     </Compile>
     <Compile Include="EncdersLog.cs" />
     <Compile Include="FormReportClass.cs" />
+    <Compile Include="frmQuarterlyCollection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmQuarterlyCollection.Designer.cs">
+      <DependentUpon>frmQuarterlyCollection.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmSummaryOfCollection.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -284,6 +290,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmQuarterlyCollection.resx">
+      <DependentUpon>frmQuarterlyCollection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmSummaryOfCollection.resx">
       <DependentUpon>frmSummaryOfCollection.cs</DependentUpon>
     </EmbeddedResource>
