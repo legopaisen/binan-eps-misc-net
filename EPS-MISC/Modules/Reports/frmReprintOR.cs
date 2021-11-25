@@ -102,79 +102,115 @@ namespace Modules.Reports
             OracleResultSet res2 = new OracleResultSet();
             res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
             if(res.Execute())
-                while(res.Read())
+            {
+                if (res.Read())
                 {
-                    dgvFees.Rows.Add();
-                    iRow2 = iRow;
-                    sFees = string.Empty;
-                    sFeesDesc = string.Empty;
-                    sCat = string.Empty;
-                    dFeesAmt = 0;
-                    dFeesAmt2 = 0;
-                    sPermitCode = res.GetString("permit_code");
-                    sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
+                    while (res.Read())
+                    {
+                        dgvFees.Rows.Add();
+                        iRow2 = iRow;
+                        sFees = string.Empty;
+                        sFeesDesc = string.Empty;
+                        sCat = string.Empty;
+                        dFeesAmt = 0;
+                        dFeesAmt2 = 0;
+                        sPermitCode = res.GetString("permit_code");
+                        sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
 
-                    sCat = res.GetString("fees_category");
-                    dFeesAmt = res.GetDouble("fees_due");
-                    dSurch = res.GetDouble("fees_surch");
+                        sCat = res.GetString("fees_category");
+                        dFeesAmt = res.GetDouble("fees_due");
+                        dSurch = res.GetDouble("fees_surch");
 
-                    dgvFees[0, iRow].Value = sPermitDesc;
-                    //dgvFees[1, iRow].Value = dFeesAmt;
+                        dgvFees[0, iRow].Value = sPermitDesc;
+                        //dgvFees[1, iRow].Value = dFeesAmt;
 
-                    dgvFees[2, iRow].Value = dSurch;
+                        dgvFees[2, iRow].Value = dSurch;
 
 
-                    //other fees - not displayed
-                    dFeesAmt2 = dFeesAmt;
-                    res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
-                    if (res2.Execute())
-                        while (res2.Read())
-                        {
-                            sFees = res2.GetString("fees_code");
-                            sCat = res2.GetString("fees_category");
-                            sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
-                            dFeesAmt = res2.GetDouble("fees_due");
-
-                            blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
-                            if (blnDisplay == false) //skip display of fees if false
+                        //other fees - not displayed
+                        dFeesAmt2 = dFeesAmt;
+                        res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
+                        if (res2.Execute())
+                            while (res2.Read())
                             {
-                                dFeesAmt2 += dFeesAmt;
-                                dgvFees[1, iRow].Value = dFeesAmt2;
+                                sFees = res2.GetString("fees_code");
+                                sCat = res2.GetString("fees_category");
+                                sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
+                                dFeesAmt = res2.GetDouble("fees_due");
+
+                                blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
+                                if (blnDisplay == false) //skip display of fees if false
+                                {
+                                    dFeesAmt2 += dFeesAmt;
+                                    dgvFees[1, iRow].Value = dFeesAmt2;
+                                }
+
                             }
+                        res2.Close();
 
-                        }
-                    res2.Close();
-
-                    //other fees - displayed
-                    res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
-                    if (res2.Execute())
-                        while (res2.Read())
-                        {
-                            sFees = res2.GetString("fees_code");
-                            sCat = res2.GetString("fees_category");
-                            sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
-                            dFeesAmt = res2.GetDouble("fees_due");
-
-                            blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
-                            if (blnDisplay == true) //skip display of fees if false
+                        //other fees - displayed
+                        res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
+                        if (res2.Execute())
+                            while (res2.Read())
                             {
-                                dgvFees.Rows.Add();
-                                iRow2++;
-                                dgvFees[0, iRow2].Value = sFeesDesc;
-                                dgvFees[1, iRow2].Value = dFeesAmt;
-                                dgvFees[2, iRow2].Value = 0;
-                                dgvFees[3, iRow2].Value = dFeesAmt;
+                                sFees = res2.GetString("fees_code");
+                                sCat = res2.GetString("fees_category");
+                                sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
+                                dFeesAmt = res2.GetDouble("fees_due");
+
+                                blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
+                                if (blnDisplay == true) //skip display of fees if false
+                                {
+                                    dgvFees.Rows.Add();
+                                    iRow2++;
+                                    dgvFees[0, iRow2].Value = sFeesDesc;
+                                    dgvFees[1, iRow2].Value = dFeesAmt;
+                                    dgvFees[2, iRow2].Value = 0;
+                                    dgvFees[3, iRow2].Value = dFeesAmt;
+                                }
+
                             }
+                        res2.Close();
+                        dgvFees[1, iRow].Value = dFeesAmt2;
 
-                        }
-                    res2.Close();
-                    dgvFees[1, iRow].Value = dFeesAmt2;
+                        dFeesTotal = dFeesAmt2 + dSurch;
+                        dgvFees[3, iRow].Value = dFeesTotal;
 
-                    dFeesTotal = dFeesAmt2 + dSurch;
-                    dgvFees[3, iRow].Value = dFeesTotal;
-
-                    iRow++;
+                        iRow++;
+                    }
                 }
+                else //AFM 20211123 requested by binan as per rj - allow billing of additional fees only on any permit
+                // proceeding this condition means additional fees are only billed on permit
+                {
+                    res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category = 'ADDITIONAL' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
+                    if(res.Execute())
+                        if(res.Read())
+                        {
+                            dgvFees.Rows.Add();
+                            iRow2 = iRow;
+                            sFees = string.Empty;
+                            sFeesDesc = string.Empty;
+                            sCat = string.Empty;
+                            dFeesAmt = 0;
+                            dFeesAmt2 = 0;
+                            sPermitCode = res.GetString("permit_code");
+                            sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
+
+                            sCat = res.GetString("fees_category");
+                            dFeesAmt = res.GetDouble("fees_due");
+                            dSurch = res.GetDouble("fees_surch");
+                            dFeesTotal = dFeesAmt + dSurch;
+
+                            dgvFees[0, iRow].Value = sPermitDesc;
+                            dgvFees[1, iRow].Value = dFeesAmt;
+                            dgvFees[2, iRow].Value = dSurch;
+                            dgvFees[3, iRow].Value = dFeesTotal;
+                        }
+
+                }
+
+            }
+                
             res.Close();
 
             res.Query = $"select distinct teller_code, bill_no, refno, or_date, fees_amt_due, payer_code from payments_info where or_no = '{txtOR.Text.Trim()}'";

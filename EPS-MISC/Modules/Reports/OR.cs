@@ -152,76 +152,114 @@ namespace Modules.Reports
 
             res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
             if (res.Execute())
-                while(res.Read())
+            {
+                if (res.Read())
                 {
-                    sFees = string.Empty;
-                    sFeesDesc = string.Empty;
-                    sCat = string.Empty;
-                    dFeesAmt = 0;
-                    dFeesAmt2 = 0;
-                    myDataRow = dtTable.NewRow();
-                    sPermitCode = res.GetString("permit_code");
-                    sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
+                    while (res.Read())
+                    {
+                        sFees = string.Empty;
+                        sFeesDesc = string.Empty;
+                        sCat = string.Empty;
+                        dFeesAmt = 0;
+                        dFeesAmt2 = 0;
+                        myDataRow = dtTable.NewRow();
+                        sPermitCode = res.GetString("permit_code");
+                        sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
 
-                    sCat = res.GetString("fees_category");
-                    dFeesAmt = res.GetDouble("fees_due");
-                    dSurch = res.GetDouble("fees_surch");
+                        sCat = res.GetString("fees_category");
+                        dFeesAmt = res.GetDouble("fees_due");
+                        dSurch = res.GetDouble("fees_surch");
 
-                    myDataRow["FeesDesc"] = sPermitDesc;
-                    //myDataRow["Amount"] = dFeesAmt;
-                    dtTable.Rows.Add(myDataRow);
+                        myDataRow["FeesDesc"] = sPermitDesc;
+                        //myDataRow["Amount"] = dFeesAmt;
+                        dtTable.Rows.Add(myDataRow);
 
-                    //other fees - not displayed
-                    dFeesAmt2 = dFeesAmt;
-                    res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
-                    if (res2.Execute())
-                        while (res2.Read())
-                        {
-                            sFees = res2.GetString("fees_code");
-                            sCat = res2.GetString("fees_category");
-                            sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
-                            dFeesAmt = res2.GetDouble("fees_due");
-
-                            blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
-                            if (blnDisplay == false) //skip display of fees if false
+                        //other fees - not displayed
+                        dFeesAmt2 = dFeesAmt;
+                        res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
+                        if (res2.Execute())
+                            while (res2.Read())
                             {
-                                dFeesAmt2 += dFeesAmt;
-                                myDataRow["Amount"] = dFeesAmt2;
+                                sFees = res2.GetString("fees_code");
+                                sCat = res2.GetString("fees_category");
+                                sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
+                                dFeesAmt = res2.GetDouble("fees_due");
+
+                                blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
+                                if (blnDisplay == false) //skip display of fees if false
+                                {
+                                    dFeesAmt2 += dFeesAmt;
+                                    myDataRow["Amount"] = dFeesAmt2;
+                                }
+
                             }
+                        res2.Close();
+                        myDataRow["Amount"] = dFeesAmt2;
 
-                        }
-                    res2.Close();
-                    myDataRow["Amount"] = dFeesAmt2;
+                        myDataRow = dtTable.NewRow();
+                        myDataRow["FeesDesc"] = "SURCHARGE";
+                        myDataRow["Amount"] = dSurch;
+                        dtTable.Rows.Add(myDataRow);
 
-                    myDataRow = dtTable.NewRow();
-                    myDataRow["FeesDesc"] = "SURCHARGE";
-                    myDataRow["Amount"] = dSurch;
-                    dtTable.Rows.Add(myDataRow);
-
-                    //other fees - displayed
-                    dFeesAmt2 = dFeesAmt;
-                    res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
-                    if (res2.Execute())
-                        while (res2.Read())
-                        {
-                            sFees = res2.GetString("fees_code");
-                            sCat = res2.GetString("fees_category");
-                            sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
-                            dFeesAmt = res2.GetDouble("fees_due");
-
-                            blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
-                            if (blnDisplay == true) //skip display of fees if false
+                        //other fees - displayed
+                        dFeesAmt2 = dFeesAmt;
+                        res2.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category <> 'MAIN' and permit_code = '{sPermitCode}' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";
+                        if (res2.Execute())
+                            while (res2.Read())
                             {
-                                myDataRow = dtTable.NewRow();
-                                myDataRow["FeesDesc"] = sFeesDesc;
-                                myDataRow["Amount"] = dFeesAmt;
+                                sFees = res2.GetString("fees_code");
+                                sCat = res2.GetString("fees_category");
+                                sFeesDesc = AppSettingsManager.GetFeesDesc(sCat, sFees);
+                                dFeesAmt = res2.GetDouble("fees_due");
 
-                                dtTable.Rows.Add(myDataRow);
+                                blnDisplay = AppSettingsManager.FeesDisplayOnly(sCat, sFees);
+                                if (blnDisplay == true) //skip display of fees if false
+                                {
+                                    myDataRow = dtTable.NewRow();
+                                    myDataRow["FeesDesc"] = sFeesDesc;
+                                    myDataRow["Amount"] = dFeesAmt;
+
+                                    dtTable.Rows.Add(myDataRow);
+                                }
+
                             }
-
-                        }
-                    res2.Close();
+                        res2.Close();
+                    }
                 }
+                else //AFM 20211123 requested by binan as per rj - allow billing of additional fees only on any permit
+                // proceeding this condition means additional fees are only billed on permit
+                {
+                    res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category = 'ADDITIONAL' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
+                    if(res.Execute())
+                        if(res.Read())
+                        {
+                            sFees = string.Empty;
+                            sFeesDesc = string.Empty;
+                            sCat = string.Empty;
+                            dFeesAmt = 0;
+
+                            myDataRow = dtTable.NewRow();
+                            sPermitCode = res.GetString("permit_code");
+                            sPermitDesc = "ADDITIONAL FEES";
+
+                            sCat = res.GetString("fees_category");
+                            dFeesAmt = res.GetDouble("fees_due");
+                            dSurch = res.GetDouble("fees_surch");
+
+                            myDataRow["Amount"] = dFeesAmt;
+                            myDataRow["FeesDesc"] = sPermitDesc;
+                            dtTable.Rows.Add(myDataRow);
+
+
+                            myDataRow = dtTable.NewRow();
+                            myDataRow["FeesDesc"] = "SURCHARGE";
+                            myDataRow["Amount"] = dSurch;
+                            dtTable.Rows.Add(myDataRow);
+                        }
+                }
+
+            }
+               
             res.Close();
 
             //res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, fees_code, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category = 'ADDITIONAL' group by fees_category, permit_code, fees_surch, fees_amt_due, fees_code order by permit_code";

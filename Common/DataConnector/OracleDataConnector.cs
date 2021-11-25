@@ -195,7 +195,12 @@ namespace Common.DataConnector
                 m_strErrorDescription = ex.Message.ToString();
                 return false;
             }
-            
+
+            if (m_strUserId.Substring(m_strUserId.Length - 1) == "t")
+            {
+                System.Windows.Forms.MessageBox.Show("You are connected in test database!");
+            }
+
             return true;
         }
 

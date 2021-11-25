@@ -268,65 +268,107 @@ namespace Modules.Transactions
             res2.Query += $" group by TD.permit_code, PT.permit_desc, TD.FEES_CATEGORY";
 
             if (res2.Execute())
-                while(res2.Read())
+            {
+                if (res2.Read())
                 {
-                    dTotalAmt = 0;
-                    //sFees = res2.GetString("fees_code");
-                    dFeesAmt = res2.GetDouble("fees_amt");
-                    sFeesCat = res2.GetString("fees_category");
-                    sPermitCode = res2.GetString("permit_code");
-                    sPermitDesc = res2.GetString("permit_desc");
-                    //sFeesDesc = res2.GetString("fees_desc");
+                    while (res2.Read())
+                    {
+                        dTotalAmt = 0;
+                        //sFees = res2.GetString("fees_code");
+                        dFeesAmt = res2.GetDouble("fees_amt");
+                        sFeesCat = res2.GetString("fees_category");
+                        sPermitCode = res2.GetString("permit_code");
+                        sPermitDesc = res2.GetString("permit_desc");
+                        //sFeesDesc = res2.GetString("fees_desc");
 
-                    //surcharge
-                    res3.Query = $"select sum(TD.fees_amt) as fees_amt from other_major_fees OM, taxdues TD ";
-                    res3.Query += $"where fees_desc = 'SURCHARGE' ";
-                    res3.Query += $"AND substr(TD.fees_code,1,2) = OM.fees_code and TD.arn = '{m_sAN}' ";
-                    res3.Query += $"AND TD.fees_category = 'OTHERS' ";
-                    res3.Query += $"AND TD.permit_code = '{sPermitCode}' ";
-                    float.TryParse(res3.ExecuteScalar().ToString(), out fSurch);
-                    res3.Close();
+                        //surcharge
+                        res3.Query = $"select sum(TD.fees_amt) as fees_amt from other_major_fees OM, taxdues TD ";
+                        res3.Query += $"where fees_desc = 'SURCHARGE' ";
+                        res3.Query += $"AND substr(TD.fees_code,1,2) = OM.fees_code and TD.arn = '{m_sAN}' ";
+                        res3.Query += $"AND TD.fees_category = 'OTHERS' ";
+                        res3.Query += $"AND TD.permit_code = '{sPermitCode}' ";
+                        float.TryParse(res3.ExecuteScalar().ToString(), out fSurch);
+                        res3.Close();
 
-                    //additional
-                    res3.Query = "select sum(taxdues.fees_amt) as fees_amt ";
+                        //additional
+                        res3.Query = "select sum(taxdues.fees_amt) as fees_amt ";
+                        res3.Query += "from taxdues ";
+                        res3.Query += $"where taxdues.arn = '{m_sAN}' ";
+                        res3.Query += $"AND TAXDUES.FEES_CATEGORY = 'ADDITIONAL' ";
+                        res3.Query += $"AND taxdues.permit_code = '{sPermitCode}' ";
+                        float.TryParse(res3.ExecuteScalar().ToString(), out fAddl);
+                        res3.Close();
+
+
+                        //add others value to total if is not tagged for display
+                        //if (IsOk == false)
+                        //{
+                        res3.Query = "select O.fees_desc, sum(taxdues.fees_amt) as fees_amt, taxdues.fees_code as fees_code ";
+                        res3.Query += "from taxdues, other_major_fees O ";
+                        res3.Query += $"where substr(taxdues.fees_code,1,2) = O.fees_code and taxdues.arn = '{m_sAN}' ";
+                        res3.Query += $"AND O.FEES_DESC <> 'SURCHARGE' ";
+                        res3.Query += $"AND taxdues.fees_category = 'OTHERS' ";
+                        res3.Query += $"AND taxdues.permit_code = '{sPermitCode}' ";
+                        res3.Query += $"group by o.fees_desc, taxdues.fees_code";
+                        if (res3.Execute())
+                            while (res3.Read())
+                            {
+                                sFees = res3.GetString("fees_code");
+                                float.TryParse(res3.GetDouble("fees_amt").ToString(), out fOthers);
+
+                                if (ValidateTaggedDisplay(sFees))
+                                    dTotalAmt += fOthers;
+                            }
+                        //IsOk = true;
+                        res3.Close();
+                        //}
+
+
+                        dTotalAmt += dFeesAmt;
+                        dTotalAmt += fSurch;
+                        dTotalAmt += fAddl;
+
+                        sFeesAmt = string.Format("{0:#,##0.00}", dFeesAmt);
+                        sSurch = string.Format("{0:#,##0.00}", fSurch);
+                        sTotalAmt = string.Format("{0:#,##0.00}", dTotalAmt);
+
+                        //for payments info table
+                        res.Query = "select distinct TD.permit_code, TD.fees_code, TD.FEES_AMT, TD.FEES_CATEGORY ";
+                        res.Query += "from taxdues TD, permit_tbl PT ";
+                        res.Query += $"where substr(TD.permit_code,1,2) = PT.permit_code and TD.arn = '{m_sAN}' and TD.bill_no = '{txtBillNo.Text.Trim()}' ";
+                        res.Query += $"and PT.permit_code = '{sPermitCode}' ";
+                        if (res.Execute())
+                            while (res.Read())
+                            {
+                                dgvTaxDuesInfo.Rows.Add(res.GetString("fees_code"), res.GetString("permit_code"), res.GetDouble("fees_amt").ToString("#,##0.00"), fSurch.ToString("#,##0.00"), 0, sTotalAmt, res.GetString("fees_category"));
+                            }
+                        res.Close();
+
+                        dgvTaxDues.Rows.Add("", sPermitDesc, sFeesAmt, sSurch, 0, sTotalAmt, sPermitCode, sFeesCat);
+
+                        dAllTotalAmt += dTotalAmt;
+
+                    }
+                }
+                else //AFM 20211123 requested by binan as per rj - allow billing of additional fees only on any permit
+                // proceeding this condition means additional fees are only billed on permit
+                {
+                    res3.Query = "select sum(taxdues.fees_amt) as fees_amt, permit_code ";
                     res3.Query += "from taxdues ";
                     res3.Query += $"where taxdues.arn = '{m_sAN}' ";
-                    res3.Query += $"AND TAXDUES.FEES_CATEGORY = 'ADDITIONAL' ";
-                    res3.Query += $"AND taxdues.permit_code = '{sPermitCode}' ";
-                    float.TryParse(res3.ExecuteScalar().ToString(), out fAddl);
-                    res3.Close();
-
-
-                    //add others value to total if is not tagged for display
-                    //if (IsOk == false)
-                    //{
-                    res3.Query = "select O.fees_desc, sum(taxdues.fees_amt) as fees_amt, taxdues.fees_code as fees_code ";
-                    res3.Query += "from taxdues, other_major_fees O ";
-                    res3.Query += $"where substr(taxdues.fees_code,1,2) = O.fees_code and taxdues.arn = '{m_sAN}' ";
-                    res3.Query += $"AND O.FEES_DESC <> 'SURCHARGE' ";
-                    res3.Query += $"AND taxdues.fees_category = 'OTHERS' ";
-                    res3.Query += $"AND taxdues.permit_code = '{sPermitCode}' ";
-                    res3.Query += $"group by o.fees_desc, taxdues.fees_code";
+                    res3.Query += $"AND TAXDUES.FEES_CATEGORY = 'ADDITIONAL' group by permit_code";
                     if (res3.Execute())
-                        while (res3.Read())
+                        if (res3.Read())
                         {
-                            sFees = res3.GetString("fees_code");
-                            float.TryParse(res3.GetDouble("fees_amt").ToString(), out fOthers);
-
-                            if (ValidateTaggedDisplay(sFees))
-                                dTotalAmt += fOthers;
+                            fAddl = Convert.ToInt64(res3.GetDouble("fees_amt"));
+                            sFeesCat = "ADDITIONAL";
+                            sPermitCode = res3.GetString("permit_code");
+                            sPermitDesc = "ADDITIONAL FEES";
+                            dTotalAmt = fAddl;
                         }
-                    //IsOk = true;
                     res3.Close();
-                    //}
 
-
-                    dTotalAmt += dFeesAmt;
-                    dTotalAmt += fSurch;
-                    dTotalAmt += fAddl;
-
-                    sFeesAmt = string.Format("{0:#,##0.00}", dFeesAmt);
-                    sSurch = string.Format("{0:#,##0.00}", fSurch);
+                    sFeesAmt = string.Format("{0:#,##0.00}", fAddl);
                     sTotalAmt = string.Format("{0:#,##0.00}", dTotalAmt);
 
                     //for payments info table
@@ -341,11 +383,15 @@ namespace Modules.Transactions
                         }
                     res.Close();
 
-                    dgvTaxDues.Rows.Add("",sPermitDesc, sFeesAmt, sSurch, 0, sTotalAmt, sPermitCode, sFeesCat);
+                    dgvTaxDues.Rows.Add("", sPermitDesc, sFeesAmt, sSurch, 0, sTotalAmt, sPermitCode, sFeesCat);
 
                     dAllTotalAmt += dTotalAmt;
 
                 }
+            }
+                
+            
+                   
             res2.Close();
 
             // for other fees tagged for display only

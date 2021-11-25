@@ -53,6 +53,14 @@ namespace EPS
 
             this.Text = "Engineering Permit System - COLLECT | Version: " + AssemblyCreationDate.Value.ToString(); //AFM 20210112
 
+            bool blnIsConnectionOpen = false;
+            blnIsConnectionOpen = DataConnectorManager.Instance.OpenConnection();
+            if (!blnIsConnectionOpen)
+            {
+                MessageBox.Show("error connection");
+                Dispose();
+                this.Close();
+            }
 
             frmLogin login = new frmLogin();
             login.ShowDialog();
