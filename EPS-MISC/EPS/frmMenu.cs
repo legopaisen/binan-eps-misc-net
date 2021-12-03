@@ -984,5 +984,35 @@ namespace EPS
                 }
             }
         }
+
+        private void dOLEToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (AppSettingsManager.Granted("COL-PO"))
+            {
+                TaskManager taskman = new TaskManager();
+                if (!taskman.IsObjectLock("ONL PAY", "", ""))
+                {
+                    frmLoginTeller login = new frmLoginTeller();
+                    login.ShowDialog();
+
+                    if (login.State == frmLoginTeller.LogInState.CancelState)
+                    {
+                        taskman.IsObjectLock("ONL PAY", "DELETE", "");
+                        return;
+                    }
+                    frmPayments form = new frmPayments();
+                    form.m_sTeller = login.m_objSystemUser.UserCode.Trim();
+                    form.isDOLE = true;
+                    if (!CheckOR(login.m_objSystemUser.UserCode.Trim()))
+                    {
+                        MessageBox.Show("No OR Declared for this Teller!", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        taskman.IsObjectLock("ONL PAY", "DELETE", "");
+                        return;
+                    }
+                    form.ShowDialog();
+                    taskman.IsObjectLock("ONL PAY", "DELETE", "");
+                }
+            }
+        }
     }
 }

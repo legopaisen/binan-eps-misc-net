@@ -23,6 +23,9 @@ namespace Modules.Reports
         private string m_sAn = string.Empty;
         private DateTime dtOR;
 
+        private string m_sPayer = string.Empty;
+        private bool isDOLE = false;
+
         private void frmReprintOR_Load(object sender, EventArgs e)
         {
             LoadFormType();
@@ -66,6 +69,18 @@ namespace Modules.Reports
             else
                 return true;
         }
+        
+        private bool CheckDOLE() // for dole transaction
+        {
+            OracleResultSet res = new OracleResultSet();
+            int cnt = 0;
+            res.Query = $"select count(*) from payments_info where refno = 'DOLE' and or_no = '{txtOR.Text.Trim()}'";
+            int.TryParse(res.ExecuteScalar(), out cnt);
+            if (cnt > 0)
+                return true;
+            else
+                return false;
+        }
 
         private void btnRetrieveInfo_Click(object sender, EventArgs e)
         {
@@ -81,6 +96,8 @@ namespace Modules.Reports
                 ClearControls();
                 return;
             }
+
+            isDOLE = CheckDOLE();
 
             ClearControls();
             string sPermitCode = string.Empty;
@@ -100,11 +117,17 @@ namespace Modules.Reports
             bool blnDisplay = false;
             OracleResultSet res = new OracleResultSet();
             OracleResultSet res2 = new OracleResultSet();
+
+            int cnt = 0;
+            //must be same with query below
+            res.Query = $"select count(*) from (select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code)";
+            int.TryParse(res.ExecuteScalar(), out cnt);
+
             res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{txtOR.Text.Trim()}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
             if(res.Execute())
             {
-                if (res.Read())
-                {
+                if (cnt>0)
+                { 
                     while (res.Read())
                     {
                         dgvFees.Rows.Add();
@@ -115,7 +138,10 @@ namespace Modules.Reports
                         dFeesAmt = 0;
                         dFeesAmt2 = 0;
                         sPermitCode = res.GetString("permit_code");
-                        sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
+                        if (isDOLE)
+                            sPermitDesc = "DOLE";
+                        else
+                            sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
 
                         sCat = res.GetString("fees_category");
                         dFeesAmt = res.GetDouble("fees_due");
@@ -245,6 +271,7 @@ namespace Modules.Reports
                     txtAmt.Text = string.Format("{0:#,##0.00}", res.GetDouble("chk_amt"));
                 }
             btnPrint.Enabled = true;
+            m_sPayer = sPayer;
         }
 
         private void btnPrint_Click(object sender, EventArgs e)
@@ -256,6 +283,8 @@ namespace Modules.Reports
             form.dtOR = dtOR;
             form.An = m_sAn;
             form.Teller = txtTeller.Text.Trim();
+            form.Payor = m_sPayer;
+            form.isDOLE = isDOLE;
             form.ShowDialog();
 
             ClearControls();

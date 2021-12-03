@@ -76,6 +76,7 @@
             this.abstractToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.summaryOfDailyCollectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.abstractOfCollectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quarterlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.utilitiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userLevelTableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -127,7 +128,7 @@
             this.lblCode = new System.Windows.Forms.Label();
             this.lblDesc = new System.Windows.Forms.Label();
             this.lblDate = new System.Windows.Forms.Label();
-            this.quarterlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dOLEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MS.SuspendLayout();
             this.pnlButton.SuspendLayout();
             this.SuspendLayout();
@@ -208,7 +209,8 @@
             this.buildingToolStripMenuItem,
             this.mechanicalToolStripMenuItem,
             this.cFEIToolStripMenuItem,
-            this.electricalOccupancyToolStripMenuItem});
+            this.electricalOccupancyToolStripMenuItem,
+            this.dOLEToolStripMenuItem});
             this.paymentsToolStripMenuItem1.Name = "paymentsToolStripMenuItem1";
             this.paymentsToolStripMenuItem1.Size = new System.Drawing.Size(165, 22);
             this.paymentsToolStripMenuItem1.Text = "Payments";
@@ -531,6 +533,13 @@
             this.abstractOfCollectionsToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
             this.abstractOfCollectionsToolStripMenuItem.Text = "Abstract of Collections";
             this.abstractOfCollectionsToolStripMenuItem.Click += new System.EventHandler(this.abstractOfCollectionsToolStripMenuItem_Click);
+            // 
+            // quarterlyToolStripMenuItem
+            // 
+            this.quarterlyToolStripMenuItem.Name = "quarterlyToolStripMenuItem";
+            this.quarterlyToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
+            this.quarterlyToolStripMenuItem.Text = "Quarterly Collection Report";
+            this.quarterlyToolStripMenuItem.Click += new System.EventHandler(this.quarterlyToolStripMenuItem_Click);
             // 
             // utilitiesToolStripMenuItem
             // 
@@ -1018,12 +1027,12 @@
             this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblDate.Visible = false;
             // 
-            // quarterlyToolStripMenuItem
+            // dOLEToolStripMenuItem
             // 
-            this.quarterlyToolStripMenuItem.Name = "quarterlyToolStripMenuItem";
-            this.quarterlyToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
-            this.quarterlyToolStripMenuItem.Text = "Quarterly Collection Report";
-            this.quarterlyToolStripMenuItem.Click += new System.EventHandler(this.quarterlyToolStripMenuItem_Click);
+            this.dOLEToolStripMenuItem.Name = "dOLEToolStripMenuItem";
+            this.dOLEToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.dOLEToolStripMenuItem.Text = "DOLE";
+            this.dOLEToolStripMenuItem.Click += new System.EventHandler(this.dOLEToolStripMenuItem_Click);
             // 
             // frmMenu
             // 
@@ -1158,6 +1167,7 @@
         private System.Windows.Forms.ToolStripMenuItem summaryOfDailyCollectionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem abstractOfCollectionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quarterlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dOLEToolStripMenuItem;
     }
 }
 

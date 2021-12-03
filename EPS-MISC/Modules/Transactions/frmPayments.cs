@@ -34,6 +34,8 @@ namespace Modules.Transactions
         private double dCashTender = 0;
         private string sPaymentType = string.Empty;
         private bool blnAllUsed = false;
+        public bool isDOLE = false;
+        public string m_sBillNo = string.Empty;
 
         private void frmPayments_Load(object sender, EventArgs e)
         {
@@ -41,7 +43,13 @@ namespace Modules.Transactions
             cmbMode.Items.Add("OFFLINE");
             m_sModule = "PAYMENT-ONLINE";
             cmbMode.SelectedIndex = 0; //set to ONLINE
-            this.an1.ArnCode.Enabled = true;
+            if(isDOLE) //AFM 20211203
+            {
+                this.an1.Enabled = false;
+                btnSearch.Enabled = false;
+            }
+            else
+                this.an1.ArnCode.Enabled = true;
             EnableControls(false);
             LoadCurrentOR(m_sTeller);
         }
@@ -72,6 +80,7 @@ namespace Modules.Transactions
         private void ClearControls()
         {
             taskman.RemTask(m_sAN);
+            taskman.RemTask(m_sBillNo);
             txtBillNo.Text = string.Empty;
             txtProjDesc.Text = string.Empty;
             txtProjLoc.Text = string.Empty;
@@ -103,7 +112,11 @@ namespace Modules.Transactions
         {
             if (btnExit.Text == "Exit")
             {
-                taskman.RemTask(m_sAN);
+                if(isDOLE)
+                    taskman.RemTask(m_sBillNo);
+                else
+                    taskman.RemTask(m_sAN);
+
                 this.Close();
             }
             else
@@ -157,6 +170,59 @@ namespace Modules.Transactions
             EnableControls(true);
         }
 
+        private void GetDOLEDues()
+        {
+            OracleResultSet res = new OracleResultSet();
+            string sFees = string.Empty;
+            double dFeesAmt = 0;
+            string sFeesCat = string.Empty;
+            string sPermitCode = string.Empty;
+            string sFeesDesc = string.Empty;
+            string sFeesCode = string.Empty;
+            string sPermitDesc = string.Empty;
+            string sFeesAmt = string.Empty;
+            string sTotalAmt = string.Empty;
+            string sAllTotalAmt = string.Empty;
+            double dTotalAmt = 0;
+            double dAllTotalAmt = 0;
+
+            dgvTaxDuesInfo.Rows.Clear();
+            dgvTaxDues.Rows.Clear();
+            res.Query = $"select * from BILL_DOLE_INFO where bill_no = '{m_sBillNo}'";
+            if(res.Execute())
+                if(res.Read())
+                {
+                    dTotalAmt = 0;
+                    dFeesAmt = res.GetDouble("total_all_amt");
+                    sFeesCode = res.GetString("fees_code");
+                    sPermitDesc = "DOLE";
+
+                    dTotalAmt += dFeesAmt;
+
+                    sFeesAmt = string.Format("{0:#,##0.00}", dFeesAmt);
+                    sTotalAmt = string.Format("{0:#,##0.00}", dTotalAmt);
+
+                    
+                    dgvTaxDuesInfo.Rows.Add(sFeesCode, "", dTotalAmt.ToString("#,##0.00"), 0, 0, sTotalAmt, "MAIN");
+
+                    dgvTaxDues.Rows.Add("", sPermitDesc, sFeesAmt, 0, 0, sTotalAmt, "", "MAIN");
+
+                    dAllTotalAmt += dTotalAmt;
+
+                    m_sProjOwner = res.GetString("payer_code");
+                }
+
+            sAllTotalAmt = string.Format("{0:#,###.00}", dAllTotalAmt);
+
+            txtGrandTotal.Text = sAllTotalAmt;
+
+            //WIP
+            txtCredBal.Text = string.Format("{0:#,##0.00}", 0);
+            txtNewCredit.Text = string.Format("{0:#,##0.00}", 0);
+            txtTaxCredLess.Text = string.Format("{0:#,##0.00}", 0);
+
+        }
+
         private bool DisplayData()
         {
             var db = new EPSConnection(dbConn);
@@ -164,54 +230,89 @@ namespace Modules.Transactions
             string strWhereCond = string.Empty;
             int iRecCount = 0;
             var result = (dynamic)null;
+            int iCnt = 0;
 
-            //strWhereCond = $" where arn = '{m_sAN}' and main_application = 1";
-            strWhereCond = $" where arn = '{m_sAN}'";
-            result = from a in Records.ApplicationQueList.GetApplicationQue(strWhereCond)
-                     select a;
-
-            foreach(var item in result)
+            if (isDOLE)
             {
-                iRecCount++;
-                txtProjDesc.Text = item.PROJ_DESC;
-                txtProjLoc.Text = string.Format("{0} {1} {2} {3} {4} {5} {6} ", item.PROJ_HSE_NO, item.PROJ_LOT_NO, item.PROJ_BLK_NO, item.PROJ_ADDR, item.PROJ_BRGY, item.PROJ_CITY, item.PROJ_PROV);
+                OracleResultSet res = new OracleResultSet();
+                OracleResultSet res2 = new OracleResultSet();
 
-                m_sProjOwner = item.PROJ_OWNER;
-                Accounts account = new Accounts();
-                account.GetOwner(m_sProjOwner);
+                res.Query = $"select * from BILLING_DOLE where bill_no = '{m_sBillNo}'";
+                if(res.Execute())
+                    if(res.Read())
+                    {
+                        string sApplicant = res.GetString("applicant_no");
+                        txtAppDate.Text = res.GetDateTime("bill_date").ToShortDateString();
 
-                txtProjOwn.Text = account.OwnerName;
+                        res2.Query = $"select * from dole_applicant where applicant_no = '{sApplicant}'";
+                        if(res2.Execute())
+                            if(res2.Read())
+                            {
+                                txtProjDesc.Text = res2.GetString("applicant_name");
+                                txtProjLoc.Text = res2.GetString("address");
+                                txtOccupancy.Text = res2.GetString("category_type");
+                            }
+                        res2.Close();
+                        iCnt++;
+                    }
+                res.Close();
 
-                try
-                {
-                    DateTime.TryParse(item.DATE_APPLIED.ToString(), out dtApplied);
-
-                    txtAppDate.Text = dtApplied.ToShortDateString();
-                }
-                catch
-                {
-                    txtAppDate.Text = "";
-                }
-                txtStatus.Text = item.STATUS_CODE;
+                GetDOLEDues();
             }
+            else
+            {
+                //strWhereCond = $" where arn = '{m_sAN}' and main_application = 1";
+                strWhereCond = $" where arn = '{m_sAN}'";
+                result = from a in Records.ApplicationQueList.GetApplicationQue(strWhereCond)
+                         select a;
 
-            if (iRecCount == 0)
+                foreach (var item in result)
+                {
+                    iRecCount++;
+                    txtProjDesc.Text = item.PROJ_DESC;
+                    txtProjLoc.Text = string.Format("{0} {1} {2} {3} {4} {5} {6} ", item.PROJ_HSE_NO, item.PROJ_LOT_NO, item.PROJ_BLK_NO, item.PROJ_ADDR, item.PROJ_BRGY, item.PROJ_CITY, item.PROJ_PROV);
+
+                    m_sProjOwner = item.PROJ_OWNER;
+                    Accounts account = new Accounts();
+                    account.GetOwner(m_sProjOwner);
+
+                    txtProjOwn.Text = account.OwnerName;
+
+                    try
+                    {
+                        DateTime.TryParse(item.DATE_APPLIED.ToString(), out dtApplied);
+
+                        txtAppDate.Text = dtApplied.ToShortDateString();
+                    }
+                    catch
+                    {
+                        txtAppDate.Text = "";
+                    }
+                    txtStatus.Text = item.STATUS_CODE;
+                }
+            }
+            
+
+            if (iRecCount == 0 && !isDOLE)
             {
                 MessageBox.Show("No application found", m_sModule, MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return false;
             }
 
-            string sQuery = string.Empty;
-            int iCnt = 0;
-
-            sQuery = "select * from taxdues where ";
-            sQuery += $" arn = '{m_sAN}' ";
-            var epsrec = db.Database.SqlQuery<TAXDUES>(sQuery);
-
-            foreach (var items in epsrec)
+            if(!isDOLE)
             {
-                iCnt++;
-                txtBillNo.Text = items.BILL_NO;
+                string sQuery = string.Empty;
+
+                sQuery = "select * from taxdues where ";
+                sQuery += $" arn = '{m_sAN}' ";
+                var epsrec = db.Database.SqlQuery<TAXDUES>(sQuery);
+
+                foreach (var items in epsrec)
+                {
+                    iCnt++;
+                    txtBillNo.Text = items.BILL_NO;
+                }
+                GetTaxDues();
             }
 
             if (iCnt == 0)
@@ -220,7 +321,6 @@ namespace Modules.Transactions
                 return false;
             }
 
-            GetTaxDues();
             btnExit.Text = "Cancel";
             return true;
         }
@@ -451,12 +551,25 @@ namespace Modules.Transactions
         {
             if(SearchBilling())
             {
-                m_sAN = an1.GetAn();
-                if (string.IsNullOrEmpty(m_sAN))
-                    return;
+                if(!isDOLE)
+                {
+                    m_sAN = an1.GetAn();
+                    if (string.IsNullOrEmpty(m_sAN))
+                        return;
+                }
+                
 
-                if (!taskman.AddTask(m_sModule, m_sAN))
-                    return;
+                if(isDOLE)
+                {
+                    if (!taskman.AddTask(m_sModule, m_sBillNo))
+                        return;
+                }
+                else
+                {
+                    if (!taskman.AddTask(m_sModule, m_sAN))
+                        return;
+                }
+               
 
                 if (!DisplayData())
                 {
@@ -480,11 +593,21 @@ namespace Modules.Transactions
         private bool SearchBilling()
         {
             OracleResultSet result = new OracleResultSet();
-            result.Query = $"select * from billing where bill_no = '{txtBillNo.Text.Trim()}'";
+            if(isDOLE)
+                result.Query = $"select * from billing_dole where bill_no = '{txtBillNo.Text.Trim()}'";
+            else
+                result.Query = $"select * from billing where bill_no = '{txtBillNo.Text.Trim()}'";
+
             if (result.Execute())
                 if (result.Read())
                 {
-                    an1.SetAn(result.GetString("arn"));
+                    if (isDOLE)
+                    {
+                        m_sBillNo = result.GetString("bill_no");
+                        txtBillNo.Text = m_sBillNo;
+                    }
+                    else
+                        an1.SetAn(result.GetString("arn"));
                     return true;
                 }
                 else
@@ -507,11 +630,24 @@ namespace Modules.Transactions
 
         private void btnAccept_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(m_sAN))
+            if(isDOLE)
             {
-                MessageBox.Show("Select record for payment", " ", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return;
+                if (string.IsNullOrEmpty(m_sBillNo))
+                {
+                    MessageBox.Show("Select Bill No!", "DOLE", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+                    
             }
+            else
+            {
+                if (string.IsNullOrEmpty(m_sAN))
+                {
+                    MessageBox.Show("Select record for payment", " ", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+            }
+           
             if(chkCash.Checked == false && chkCheque.Checked == false)
             {
                 MessageBox.Show("Please select payment type", " ", MessageBoxButtons.OK, MessageBoxIcon.Stop);
@@ -605,7 +741,10 @@ namespace Modules.Transactions
                     double.TryParse(dgvTaxDues[3, iRow].Value.ToString(), out dSurch);
                     
                     res.Query = $"INSERT INTO PAYMENTS VALUES( ";
-                    res.Query += $"'{m_sAN}',";
+                    if(isDOLE)
+                        res.Query += $"'DOLE',";
+                    else
+                        res.Query += $"'{m_sAN}',";
                     res.Query += $"'{txtCurrOR.Text}', ";
                     res.Query += $"to_date('{dtOR.Text.ToString()}','MM/dd/yyyy'), ";
                     res.Query += $"'{txtBillNo.Text}', ";
@@ -690,7 +829,10 @@ namespace Modules.Transactions
                     res.Query += $"'{AppSettingsManager.GetSystemDate().ToString("HH:mm")}', ";
                     res.Query += $"'{m_sTeller}', ";
                     res.Query += $"'{txtMemo.Text.Trim()}', ";
-                    res.Query += $"'{m_sAN}', ";
+                    if(isDOLE)
+                        res.Query += $"'DOLE', ";
+                    else
+                        res.Query += $"'{m_sAN}', ";
                     res.Query += $"{dFeesdue}, "; //fees due
                     res.Query += $"'{dgvTaxDuesInfo[6, iRow].Value.ToString()}', "; //fees cat
                     res.Query += $"'{dgvTaxDuesInfo[1, iRow].Value.ToString()}')"; //permit code
@@ -770,83 +912,104 @@ namespace Modules.Transactions
 
             for (int iRow = 0; iRow < dgvTaxDues.Rows.Count; iRow++)
             {
-                sPermitCode = dgvTaxDues[6, iRow].Value.ToString();
-                res.Query = $"INSERT INTO APPLICATION_HIST SELECT * FROM APPLICATION where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                if(isDOLE)
+                {
+                    res.Query = $"INSERT INTO BILLING_DOLE_HIST SELECT * FROM BILLING_DOLE where BILL_NO = '{m_sBillNo}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"DELETE FROM APPLICATION where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"DELETE FROM BILLING_DOLE where BILL_NO = '{m_sBillNo}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"INSERT INTO APPLICATION SELECT * FROM APPLICATION_QUE where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"INSERT INTO BILL_DOLE_INFO_HIST SELECT * FROM BILL_DOLE_INFO where BILL_NO = '{m_sBillNo}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"DELETE FROM APPLICATION_QUE where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"DELETE FROM BILL_DOLE_INFO where BILL_NO = '{m_sBillNo}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"DELETE FROM BILL_TMP where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                }
+                else
+                {
+                    sPermitCode = dgvTaxDues[6, iRow].Value.ToString();
+                    res.Query = $"INSERT INTO APPLICATION_HIST SELECT * FROM APPLICATION where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"INSERT INTO TAXDUES_HIST SELECT * FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"DELETE FROM APPLICATION where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"INSERT INTO TAXDUES_PAID SELECT * FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"INSERT INTO APPLICATION SELECT * FROM APPLICATION_QUE where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"DELETE FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"DELETE FROM APPLICATION_QUE where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"INSERT INTO TAX_DETAILS_HIST SELECT * FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"DELETE FROM BILL_TMP where ARN = '{m_sAN}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"INSERT INTO TAX_DETAILS_PAID SELECT * FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"INSERT INTO TAXDUES_HIST SELECT * FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
 
-                res.Query = $"DELETE FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
-                if (res.ExecuteNonQuery() == 0)
-                { }
+                    res.Query = $"INSERT INTO TAXDUES_PAID SELECT * FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"DELETE FROM TAXDUES where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"INSERT INTO TAX_DETAILS_HIST SELECT * FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"INSERT INTO TAX_DETAILS_PAID SELECT * FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"DELETE FROM TAX_DETAILS where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}' and permit_code = '{sPermitCode}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"INSERT INTO BILLING_HIST SELECT * FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"INSERT INTO BILLING_PAID_HIST SELECT * FROM BILLING_PAID where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"DELETE FROM BILLING_PAID where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"INSERT INTO BILLING_PAID SELECT * FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+
+                    res.Query = $"DELETE FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
+                    if (res.ExecuteNonQuery() == 0)
+                    { }
+                    ///
+                }
 
             }
-                      
-            res.Query = $"INSERT INTO BILLING_HIST SELECT * FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
-            if (res.ExecuteNonQuery() == 0)
-            { }
-
-            res.Query = $"INSERT INTO BILLING_PAID_HIST SELECT * FROM BILLING_PAID where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
-            if (res.ExecuteNonQuery() == 0)
-            { }
-
-            res.Query = $"DELETE FROM BILLING_PAID where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
-            if (res.ExecuteNonQuery() == 0)
-            { }
-
-            res.Query = $"INSERT INTO BILLING_PAID SELECT * FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
-            if (res.ExecuteNonQuery() == 0)
-            { }
-
-            res.Query = $"DELETE FROM BILLING where ARN = '{m_sAN}' AND BILL_NO = '{txtBillNo.Text.Trim()}'";
-            if (res.ExecuteNonQuery() == 0)
-            { }
-            ///
-            
-
-
-
 
             MessageBox.Show("Payment Saved!", m_sModule, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
 
             string sObj = string.Empty;
-            sObj = "ONL PAYMENT: " + m_sAN + " OR NO: " + txtCurrOR.Text.Trim();
+            if(isDOLE)
+                sObj = "ONL PAYMENT (DOLE): " + m_sBillNo + " OR NO: " + txtCurrOR.Text.Trim();
+            else
+                sObj = "ONL PAYMENT: " + m_sAN + " OR NO: " + txtCurrOR.Text.Trim();
             if (Utilities.AuditTrail.InsertTrail("COL-PO", "payments_info", sObj) == 0)
             {
                 MessageBox.Show("Failed to insert audit trail.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -860,6 +1023,9 @@ namespace Modules.Transactions
             form.dtOR = dtOR.Value;
             form.An = m_sAN;
             form.Teller = m_sTeller;
+            if (isDOLE)
+                form.Payor = m_sProjOwner;
+            form.isDOLE = isDOLE;
             form.ShowDialog();
 
             if (blnAllUsed == true)

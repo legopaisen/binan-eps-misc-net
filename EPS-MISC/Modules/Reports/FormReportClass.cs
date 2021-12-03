@@ -19,6 +19,8 @@ namespace Modules.Reports
         public DateTime dt { get; set; }
         public string sOR { get; set; }
         public string sTeller { get; set; }
+        public string Payor { get; set; }
+        public bool isDOLE { get; set; }
 
 
         public FormReportClass(frmReport Form)

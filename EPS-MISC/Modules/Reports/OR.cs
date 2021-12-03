@@ -44,14 +44,21 @@ namespace Modules.Reports
             sOR = ReportForm.OR;
 
             //owner
-            strWhereCond = $" where arn = '{ReportForm.An}'";
-            result = from a in Records.ApplicationTblList.GetRecord(strWhereCond)
-                     select a;
-            foreach (var item in result)
+            if(isDOLE || !string.IsNullOrEmpty(Payor))
             {
-                Accounts account = new Accounts();
-                account.GetOwner(item.PROJ_OWNER);
-                sPayor = account.OwnerName;
+                sPayor = Payor;
+            }
+            else
+            {
+                strWhereCond = $" where arn = '{ReportForm.An}'";
+                result = from a in Records.ApplicationTblList.GetRecord(strWhereCond)
+                         select a;
+                foreach (var item in result)
+                {
+                    Accounts account = new Accounts();
+                    account.GetOwner(item.PROJ_OWNER);
+                    sPayor = account.OwnerName;
+                }
             }
 
             //total amt, payment type
@@ -150,11 +157,16 @@ namespace Modules.Reports
             dtSet = new DataSet();
             dtSet.Tables.Add(dtTable);
 
+            int cnt = 0;
+            //must be same with query below
+            res.Query = $"select count(*) from (select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code)";
+            int.TryParse(res.ExecuteScalar(), out cnt);
+
             res.Query = $"select distinct fees_category, permit_code, fees_surch, fees_amt_due, sum(fees_due) as fees_due from payments_info where or_no = '{sOR}' and fees_category = 'MAIN' group by fees_category, permit_code, fees_surch, fees_amt_due order by permit_code";
             if (res.Execute())
             {
-                if (res.Read())
-                {
+                if (cnt > 0)
+                { 
                     while (res.Read())
                     {
                         sFees = string.Empty;
@@ -164,7 +176,10 @@ namespace Modules.Reports
                         dFeesAmt2 = 0;
                         myDataRow = dtTable.NewRow();
                         sPermitCode = res.GetString("permit_code");
-                        sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
+                        if(isDOLE)
+                            sPermitDesc = "DOLE"; //for description in OR
+                        else
+                            sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode);
 
                         sCat = res.GetString("fees_category");
                         dFeesAmt = res.GetDouble("fees_due");

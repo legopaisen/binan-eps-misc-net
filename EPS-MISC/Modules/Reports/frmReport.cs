@@ -33,6 +33,8 @@ namespace Modules.Reports
         public string OR { get; set; }
         public string BillNo { get; set; }
         public string Teller { get; set; }
+        public string Payor { get; set; }
+        public bool isDOLE { get; set; }
 
         private string report_cd = string.Empty;
         public string report_desc = string.Empty;
@@ -197,6 +199,8 @@ namespace Modules.Reports
                 ReportClass.dt = dtOR;
                 ReportClass.AN = An;
                 ReportClass.sTeller = Teller;
+                ReportClass.Payor = Payor;
+                ReportClass.isDOLE = isDOLE;
             }
             else if (ReportName == "RCD")
             {
