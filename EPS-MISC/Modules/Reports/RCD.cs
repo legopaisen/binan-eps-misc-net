@@ -554,17 +554,19 @@ namespace Modules.Reports
 
                     result2.Close();
 
-                   
 
+                    //2nd page- OR LIST
                     string sPermitDesc = string.Empty;
                     string sOR = string.Empty;
                     string sPayor = string.Empty;
                     double dAmount = 0;
                     double dTotalAmt = 0;
+                    string sArn = string.Empty;
                     result2.Query = $"select distinct pa.*, pi.payer_code from payments pa, payments_info pi where pa.or_no = pi.or_no and pa.or_no between '{sFromOR}' and '{sToOR}' and pa.teller_code = '{ReportForm.Teller}' order by pa.or_no";
                     if(result2.Execute())
                         while(result2.Read())
                         {
+                            sArn = result2.GetString("arn");
                             sOR = result2.GetString("or_no");
                             dAmount = result2.GetDouble("fees_due");
                             dTotalAmt += dAmount;
@@ -572,7 +574,13 @@ namespace Modules.Reports
 
                             Accounts accounts = new Accounts();
                             accounts.GetOwner(result2.GetString("payer_code"));
-                            sPayor = accounts.FirstName + " " + accounts.MiddleInitial + ". " + accounts.LastName;
+                            if (sArn == "DOLE")
+                            {
+                                sPayor = "DOLE";
+                                sPermitDesc = "DOLE";
+                            }
+                            else
+                                sPayor = accounts.FirstName + " " + accounts.MiddleInitial + ". " + accounts.LastName;
 
                             myDataRow = dtTableTellerTrans.NewRow();
                             myDataRow["OR"] = "FORM 51-" + sOR;
@@ -594,7 +602,10 @@ namespace Modules.Reports
 
                             Accounts accounts = new Accounts();
                             accounts.GetOwner(result2.GetString("payer_code"));
-                            sPayor = accounts.FirstName + " " + accounts.MiddleInitial + ". " + accounts.LastName;
+                            if (sArn == "DOLE")
+                                sPayor = "DOLE";
+                            else
+                                sPayor = accounts.FirstName + " " + accounts.MiddleInitial + ". " + accounts.LastName;
 
                             myDataRow = dtTableCancelledOR.NewRow();
                             myDataRow["OR"] = "FORM 51-" + sOR;

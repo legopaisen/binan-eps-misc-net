@@ -255,7 +255,7 @@ namespace Modules.Reports
 
                             myDataRow = dtTable.NewRow();
                             sPermitCode = res.GetString("permit_code");
-                            sPermitDesc = "ADDITIONAL FEES";
+                            sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode); //requested by RJ to display by Permit name if additional fees are only billed
 
                             sCat = res.GetString("fees_category");
                             dFeesAmt = res.GetDouble("fees_due");

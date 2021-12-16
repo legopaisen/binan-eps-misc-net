@@ -359,6 +359,18 @@ namespace Modules.Transactions
             //res2.Query += $" and TD.arn in (select application_que.arn from application_que where TD.arn = application_que.arn) ";
             //res2.Query += $" order by TD.fees_code";
 
+
+            int cnt = 0;
+            //must be same with query below
+            res2.Query = $"select count(*) from (select distinct TD.permit_code, PT.permit_desc, SUM(TD.fees_amt) as fees_amt, TD.FEES_CATEGORY ";
+            res2.Query += $"from taxdues TD, permit_tbl PT ";
+            res2.Query += $"where substr(TD.permit_code,1,2) = PT.permit_code ";
+            res2.Query += $"and TD.arn = '{m_sAN}'";
+            res2.Query += $" and TD.fees_category = 'MAIN'";
+            res2.Query += $" and TD.arn in (select application_que.arn from application_que where TD.arn = application_que.arn) ";
+            res2.Query += $" group by TD.permit_code, PT.permit_desc, TD.FEES_CATEGORY)";
+            int.TryParse(res2.ExecuteScalar(), out cnt);
+
             res2.Query = $"select distinct TD.permit_code, PT.permit_desc, SUM(TD.fees_amt) as fees_amt, TD.FEES_CATEGORY ";
             res2.Query += $"from taxdues TD, permit_tbl PT ";
             res2.Query += $"where substr(TD.permit_code,1,2) = PT.permit_code ";
@@ -369,7 +381,7 @@ namespace Modules.Transactions
 
             if (res2.Execute())
             {
-                if (res2.Read())
+                if (cnt > 0)
                 {
                     while (res2.Read())
                     {
@@ -423,10 +435,9 @@ namespace Modules.Transactions
                         res3.Close();
                         //}
 
-
+                        dFeesAmt += fAddl;
                         dTotalAmt += dFeesAmt;
                         dTotalAmt += fSurch;
-                        dTotalAmt += fAddl;
 
                         sFeesAmt = string.Format("{0:#,##0.00}", dFeesAmt);
                         sSurch = string.Format("{0:#,##0.00}", fSurch);
@@ -463,7 +474,7 @@ namespace Modules.Transactions
                             fAddl = Convert.ToInt64(res3.GetDouble("fees_amt"));
                             sFeesCat = "ADDITIONAL";
                             sPermitCode = res3.GetString("permit_code");
-                            sPermitDesc = "ADDITIONAL FEES";
+                            sPermitDesc = AppSettingsManager.GetPermitDesc(sPermitCode); //requested by RJ to display by Permit name if additional fees are only billed
                             dTotalAmt = fAddl;
                         }
                     res3.Close();
