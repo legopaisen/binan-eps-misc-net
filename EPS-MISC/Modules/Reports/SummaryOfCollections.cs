@@ -49,14 +49,14 @@ namespace Modules.Reports
             string sPermitCode = string.Empty;
             double dTotalAmt = 0;
             string sPermitDesc = string.Empty;
-            res.Query = "select permit_code, nvl(sum(fees_due + fees_int + fees_surch),0) as amount from payments_info where ";
+            res.Query = "select permit_code, nvl(sum(fees_due + fees_int + fees_surch),0) as amount from payments_info where (";
             for(int icnt = 0; icnt < ReportForm.PermitList.Count; icnt++)
             {
                 res.Query += $" permit_code = '{ReportForm.PermitList[icnt]}' ";
                 if (ReportForm.PermitList.Count > 1 && icnt != ReportForm.PermitList.Count - 1)
                     res.Query += $"or ";
             }
-            res.Query += $" and teller_code = '{ReportForm.Teller}' and or_no in (select or_no from rcd_remit where or_no = payments_info.or_no and rcd_series = '{ReportForm.RCDNo}')";
+            res.Query += $") and teller_code = '{ReportForm.Teller}' and or_no in (select or_no from rcd_remit where or_no = payments_info.or_no and rcd_series = '{ReportForm.RCDNo}')";
             res.Query += " group by permit_code order by permit_code";
 
             if(res.Execute())

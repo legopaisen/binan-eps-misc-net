@@ -122,6 +122,8 @@ namespace Modules.Reports
                 {
                     if (ReportForm.Teller == "ALL") //requested by rj to include all teller and all rcd
                         sTellerTmp = "%";
+                    else
+                        sTellerTmp = sTeller;
                     sQuery = "select payer_code, or_no, or_date, form_type, permit_code, nvl(sum(fees_due + fees_int + fees_surch),0) as amount from payments_info ";
                     sQuery += $"where teller_code like '{sTellerTmp}'  and permit_code = '{res2.GetString("permit_code")}' ";
 

@@ -211,10 +211,14 @@ namespace Modules.Reports
                         res2.Close();
                         myDataRow["Amount"] = dFeesAmt2;
 
-                        myDataRow = dtTable.NewRow();
-                        myDataRow["FeesDesc"] = "SURCHARGE";
-                        myDataRow["Amount"] = dSurch;
-                        dtTable.Rows.Add(myDataRow);
+                        if(dSurch > 0) //AFM 20220207
+                        {
+                            myDataRow = dtTable.NewRow();
+                            myDataRow["FeesDesc"] = "SURCHARGE";
+                            myDataRow["Amount"] = dSurch;
+                            dtTable.Rows.Add(myDataRow);
+
+                        }
 
                         //other fees - displayed
                         dFeesAmt2 = dFeesAmt;
@@ -233,7 +237,6 @@ namespace Modules.Reports
                                     myDataRow = dtTable.NewRow();
                                     myDataRow["FeesDesc"] = sFeesDesc;
                                     myDataRow["Amount"] = dFeesAmt;
-
                                     dtTable.Rows.Add(myDataRow);
                                 }
 
@@ -266,10 +269,14 @@ namespace Modules.Reports
                             dtTable.Rows.Add(myDataRow);
 
 
-                            myDataRow = dtTable.NewRow();
-                            myDataRow["FeesDesc"] = "SURCHARGE";
-                            myDataRow["Amount"] = dSurch;
-                            dtTable.Rows.Add(myDataRow);
+                            if (dSurch > 0) //AFM 20220207
+                            {
+                                myDataRow = dtTable.NewRow();
+                                myDataRow["FeesDesc"] = "SURCHARGE";
+                                myDataRow["Amount"] = dSurch;
+                                dtTable.Rows.Add(myDataRow);
+                            }
+
                         }
                 }
 

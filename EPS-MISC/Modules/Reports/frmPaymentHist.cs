@@ -79,19 +79,19 @@ namespace Modules.Reports
                     if (txtAcct.Text != "" && m_sAn != "")
                     {
                         result.Query = "select distinct((account.acct_ln ||', '|| account.acct_fn ||' '|| account.acct_mi)) as account_name, " +
-                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr " +
+                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr, account.acct_code " +
                                                 " from account INNER JOIN payments_info ON payments_info.payer_code = account.acct_code where payments_info.payer_code = '" + txtAcct.Text + "' and payments_info.refno = '" + m_sAn + "'";
                     }
                     else if (m_sAn != "")
                     {
                         result.Query = "select distinct((account.acct_ln ||', '|| account.acct_fn ||' '|| account.acct_mi)) as account_name, " +
-                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr " +
+                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr, account.acct_code " +
                                                 " from account INNER JOIN payments_info ON payments_info.payer_code = account.acct_code where payments_info.refno = '" + m_sAn + "'";
                     }
                     else if (txtAcct.Text.Trim() != "")
                     {
                         result.Query = "select distinct((account.acct_ln ||', '|| account.acct_fn ||' '|| account.acct_mi)) as account_name, " +
-                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr " +
+                                                " (account.acct_hse_no ||' '|| account.acct_lot_no ||' '|| account.acct_blk_no ||' '|| account.acct_addr ||' '|| account.acct_brgy ||' '|| account.acct_city ||' '|| account.acct_prov) as addr, account.acct_code " +
                                                 " from account INNER JOIN payments_info ON payments_info.payer_code = account.acct_code where payments_info.payer_code = '" + txtAcct.Text + "'";
                     }
                     else
@@ -102,6 +102,7 @@ namespace Modules.Reports
                         {
                             txtPayerNm.Text = result.GetString(0);
                             txtAddr.Text = result.GetString(1);
+                            txtAcct.Text = result.GetString(2);
                         }
                 }
                 if (txtAcct.Text != "" && m_sAn != "")
