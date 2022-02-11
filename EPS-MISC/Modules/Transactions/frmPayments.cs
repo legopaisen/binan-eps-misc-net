@@ -49,7 +49,9 @@ namespace Modules.Transactions
                 btnSearch.Enabled = false;
             }
             else
-                this.an1.ArnCode.Enabled = true;
+                this.an1.ArnCode.Enabled = false;
+
+            this.an1.ArnCode.Text = "AN";
             EnableControls(false);
             LoadCurrentOR(m_sTeller);
         }
